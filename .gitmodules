@@ -7,3 +7,9 @@
 [submodule "libs/easyloggingpp"]
 	path = libs/easyloggingpp
 	url = https://github.com/amrayn/easyloggingpp.git
+[submodule "libs/json"]
+	path = libs/nlohmann_json
+	url = https://github.com/nlohmann/json.git
+[submodule "libs/doctest"]
+	path = libs/doctest
+	url = https://github.com/onqtam/doctest.git
