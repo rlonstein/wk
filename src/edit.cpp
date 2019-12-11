@@ -1,9 +1,5 @@
 #include "wk.hpp"
 
-namespace WK {
-  namespace CMDS {
-    void editEntry(std::string title) {
-      //FIXME
-    }
-  }
+void WK::CMDS::editEntry(std::string title) {
+  //FIXME
 }

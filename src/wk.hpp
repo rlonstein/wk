@@ -8,6 +8,8 @@
 #include "fmt/ostream.h"
 #include "CLI/CLI.hpp"
 #include "easylogging++.h"
+#include "SQLiteCpp/SQLiteCpp.h"
+#include "SQLiteCpp/VariadicBind.h"
 
 #ifndef H_WK
 #define H_WK
@@ -22,6 +24,16 @@ namespace WK {
     void importWiki(std::string filename, std::string format);
     void newWiki(std::string filename);
     void searchWiki(std::vector<std::string> keywords);
+  }
+  namespace UTILS {
+    constexpr std::string_view ENVPATHS[3][3] {
+      {"XDG_DATA_HOME", "", "wk.sqlite"},
+      {"HOME", ".local/share/", "wk.sqlite"},
+      {"HOME", "", ".wk.sqlite"}
+    };
+
+    bool envVarPathExists(std::string envvarname);
+    std::string findDB();
   }
 }
 #endif
