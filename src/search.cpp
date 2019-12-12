@@ -1,4 +1,5 @@
 #include "wk.hpp"
+#include "sql.hpp"
 
 void WK::CMDS::searchWiki(std::vector<std::string> keywords) {
 
@@ -19,7 +20,7 @@ void WK::CMDS::searchWiki(std::vector<std::string> keywords) {
   std::string tagQueryBinding = std::accumulate(
     keywords.begin(), keywords.end(), std::string(),
     [](std::string &ss, std::string &s){ return ss.empty() ? "?" : ss+", ?"; });
-  sql = "SELECT tag_id FROM tags WHERE tag in (" + tagQueryBinding + ")";
+  sql = fmt::sprintf(WK::SQL::templateQueryTags, tagQueryBinding);
   try {
     VLOG(1) << "Querying tags for " << keywords.size() << " keywords";
     SQLite::Statement queryTags(db, sql);
@@ -40,12 +41,10 @@ void WK::CMDS::searchWiki(std::vector<std::string> keywords) {
   // Use multiple queries to avoid using FTS3/4 which might not be
   // compiled into the local SQLite lib
   std::unordered_map<long long, std::tuple<std::string, std::string>> entries;
-  sql =
-    "SELECT entries.entry_id, entries.title, entries.content "
-    "FROM entries, taglist WHERE entries.entry_id = taglist.entry_id AND taglist.tag_id = ?";
+
   try {
     VLOG(1) << "Querying entries with matching keyword mappings";
-    SQLite::Statement queryEntries(db, sql);
+    SQLite::Statement queryEntries(db, WK::SQL::queryEntriesMatchingTags);
     for (auto rowId : tagRowIds) {
       queryEntries.bind(1, rowId);
       while (queryEntries.executeStep()) {
@@ -63,10 +62,9 @@ void WK::CMDS::searchWiki(std::vector<std::string> keywords) {
   }
 
   // Next, search for titles with the keywords in them, adding to the hashmap
-  sql = "SELECT entry_id, title, content FROM entries WHERE title LIKE ?";
   try {
     VLOG(1) << "Querying titles matching keywords";
-    SQLite::Statement queryTitles(db, sql);
+    SQLite::Statement queryTitles(db, WK::SQL::queryEntriesTitleLike);
     for (auto keyword : keywords ) {
       queryTitles.bind(1, keyword);
       while (queryTitles.executeStep()) {

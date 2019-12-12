@@ -1,5 +1,10 @@
 #include "wk.hpp"
+#include "sql.hpp"
 #include <numeric>
+#include <ctime>
+#include <iostream>
+#include <iomanip>
+#include <sstream>
 
 void WK::CMDS::addEntry(std::string title, std::vector<std::string> tags, std::string text) {
   if (VLOG_IS_ON(1)) {
@@ -8,8 +13,26 @@ void WK::CMDS::addEntry(std::string title, std::vector<std::string> tags, std::s
       [](std::string &ss, std::string &s) { return ss.empty() ? "'"+s+"'" : ss+", '"+s+"'"; } );
     VLOG(1) << "invoked add('" << title << "', [" << tagstr << "], '" << text << "')";
   }
+
+  if (title.empty() || tags.empty() || text.empty()) {
+    LOG(ERROR) << "Missing parameters";
+    throw CLI::RuntimeError(-1);
+    // TODO: if any params are empty invoked external editor with yaml
+    // template:
+    //  ---
+    //  title:
+    //  tags: []
+    //  content:
+    // This belongs in its own function
+  }
+
+  auto dbfqn = WK::UTILS::findDB();
+  if (dbfqn.empty()) {
+    LOG(ERROR) << "No wiki database found!";
+    throw CLI::RuntimeError(-1);
+  }
+
   try {
-    auto dbfqn = WK::UTILS::findDB();
     SQLite::Database db(dbfqn, SQLite::OPEN_READWRITE);
     std::string sql_tagQuery = std::accumulate(
       tags.begin(), tags.end(), std::string(),
@@ -46,8 +69,12 @@ void WK::CMDS::addEntry(std::string title, std::vector<std::string> tags, std::s
       insertTag.reset();
     }
     VLOG(1) << "Adding entry";
-    SQLite::Statement insertEntry(db, "INSERT INTO entries VALUES (NULL, ?, ?)");
-    SQLite::bind(insertEntry, std::make_tuple(title, text));
+    std::time_t t = std::time(nullptr);
+    std::tm tm = *std::localtime(&t);
+    std::stringstream timestr;
+    timestr << std::put_time(&tm, "%FT%T%z");
+    SQLite::Statement insertEntry(db, "INSERT INTO entries VALUES (NULL, ?, ?, ?, ?)");
+    SQLite::bind(insertEntry, std::make_tuple(title, text, timestr.str(), timestr.str()));
     insertEntry.exec();
     long long entryRowId = db.getLastInsertRowid();
 

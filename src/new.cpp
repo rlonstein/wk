@@ -1,4 +1,5 @@
 #include "wk.hpp"
+#include "sql.hpp"
 #include <cstdlib>
 #include <filesystem>
 
@@ -24,25 +25,13 @@ void WK::CMDS::newWiki(std::string filename) {
     throw CLI::RuntimeError(-1);
   }
   
-  std::string schema_tags_entries =
-    "CREATE TABLE tags(tag_id INTEGER UNIQUE NOT NULL PRIMARY KEY, tag TEXT UNIQUE);"
-    "CREATE UNIQUE INDEX tagidx1 on tags(tag);"
-    "CREATE TABLE entries(entry_id INTEGER UNIQUE NOT NULL PRIMARY KEY, title TEXT, content TEXT);"
-    "CREATE UNIQUE INDEX entryidx1 on entries(content);";
-  std::string schema_taglist =
-    "PRAGMA foreign_keys = ON;"
-    "CREATE TABLE taglist(taglist_id INTEGER UNIQUE NOT NULL PRIMARY KEY,"
-    "entry_id INTEGER NOT NULL, tag_id INTEGER NOT NULL,"
-    "FOREIGN KEY(entry_id) REFERENCES entries(entry_id) ON DELETE CASCADE ON UPDATE CASCADE,"
-    "FOREIGN KEY(tag_id) REFERENCES tags(entry_id) ON DELETE CASCADE ON UPDATE CASCADE);";
-
   try {
     SQLite::Database db(filename, SQLite::OPEN_READWRITE|SQLite::OPEN_CREATE);
     VLOG(1) << "opened sqlite db";
-    db.exec(schema_tags_entries);
-    VLOG(1) << "executed " << schema_tags_entries;
-    db.exec(schema_taglist);
-    VLOG(1) << "executed " << schema_taglist;
+    db.exec(WK::SQL::newSchemaTagsEntries);
+    VLOG(1) << "executed " << WK::SQL::newSchemaTagsEntries;
+    db.exec(WK::SQL::newSchemaTaglist);
+    VLOG(1) << "executed " << WK::SQL::newSchemaTaglist;
   }
   catch (SQLite::Exception e) {
     LOG(ERROR) << "SQLite error occurred: " << e.what();

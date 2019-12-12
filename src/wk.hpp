@@ -8,14 +8,21 @@
 #include "fmt/ostream.h"
 #include "CLI/CLI.hpp"
 #include "easylogging++.h"
-#include "SQLiteCpp/SQLiteCpp.h"
-#include "SQLiteCpp/VariadicBind.h"
 
 #ifndef H_WK
 #define H_WK
 #pragma once
 
 namespace WK {
+  enum class ImportFileFormats { json, yaml };
+  const std::vector<std::pair<const char*, ImportFileFormats>> ImportFormatNames = {
+    {"json", ImportFileFormats::json}, {"yaml", ImportFileFormats::yaml}
+  };
+  enum class ExportFileFormats { json, yaml, markdown };
+  const std::vector<std::pair<const char*, ExportFileFormats>> ExportFormatNames = {
+    {"json", ExportFileFormats::json}, {"yaml", ExportFileFormats::yaml}, {"markdown", ExportFileFormats::markdown}
+  };
+
   namespace CMDS {
     void addEntry(std::string title, std::vector<std::string> tags, std::string text);
     void deleteEntry(std::string title);

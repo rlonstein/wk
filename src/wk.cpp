@@ -44,16 +44,16 @@ int main(int argc, char** argv) {
   sub_delete->add_option("title", title)->required();
   sub_delete->final_callback([&title](void){WK::CMDS::deleteEntry(title);});
 
-  // wk import --format [json|markdown] <filename>
+  // wk import --format [json|yaml|markdown] <filename>
   auto sub_import = app.add_subcommand("import", "import one or more entries from a file")->alias("i");
   sub_import->add_option("filename", filename)->check(CLI::ExistingFile)->required();
-  sub_import->add_option("--format", format, "input format", true)->check(CLI::IsMember(formats));
+  sub_import->add_option("--format", format, "input format", true)->check(CLI::IsMember(WK::ImportFormatNames));
   sub_import->final_callback([&filename, &format](void){WK::CMDS::importWiki(filename, format);});
 
   // wk export --format [json|markdown] <filename> [--tags [<tag>, ...]] [--title <title>]
   auto sub_export = app.add_subcommand("export", "export one or more wiki entries")->alias("x");
   sub_export->add_option("filename", filename)->required();
-  sub_export->add_option("--format", format, "output format", true)->check(CLI::IsMember(formats));
+  sub_export->add_option("--format", format, "output format", true)->check(CLI::IsMember(WK::ExportFormatNames));
   auto sub_export_opt_tag = sub_export->add_option("--tags", tags)->expected(-1);
   auto sub_export_opt_title = sub_export->add_option("--title", title)->excludes(sub_export_opt_tag);
   sub_export_opt_tag->excludes(sub_export_opt_title);
