@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
   // wk search [<tag>, ...]
   auto sub_search = app.add_subcommand("search", "search the wiki")->alias("s");
   sub_search->add_option("keywords", tags)->expected(-1);
-  sub_search->final_callback(std::bind(&WK::CMDS::searchWiki, tags));
+  sub_search->final_callback([&tags](void){WK::CMDS::searchWiki(tags);});
   
   // wk edit <title>
   auto sub_edit = app.add_subcommand("edit", "edit a wiki entry")->alias("e");
@@ -42,13 +42,13 @@ int main(int argc, char** argv) {
   // wk delete <title>
   auto sub_delete = app.add_subcommand("delete", "delete a wiki entry")->alias("d");
   sub_delete->add_option("title", title)->required();
-  sub_delete->final_callback(std::bind(&WK::CMDS::deleteEntry, title));
+  sub_delete->final_callback([&title](void){WK::CMDS::deleteEntry(title);});
 
   // wk import --format [json|markdown] <filename>
   auto sub_import = app.add_subcommand("import", "import one or more entries from a file")->alias("i");
   sub_import->add_option("filename", filename)->check(CLI::ExistingFile)->required();
   sub_import->add_option("--format", format, "input format", true)->check(CLI::IsMember(formats));
-  sub_import->final_callback(std::bind(&WK::CMDS::importWiki, filename, format));
+  sub_import->final_callback([&filename, &format](void){WK::CMDS::importWiki(filename, format);});
 
   // wk export --format [json|markdown] <filename> [--tags [<tag>, ...]] [--title <title>]
   auto sub_export = app.add_subcommand("export", "export one or more wiki entries")->alias("x");
@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
   auto sub_export_opt_tag = sub_export->add_option("--tags", tags)->expected(-1);
   auto sub_export_opt_title = sub_export->add_option("--title", title)->excludes(sub_export_opt_tag);
   sub_export_opt_tag->excludes(sub_export_opt_title);
-  sub_export->final_callback(std::bind(&WK::CMDS::exportWiki, filename, format, title, tags));
+  sub_export->final_callback([&filename, &format, &title, &tags](void){WK::CMDS::exportWiki(filename, format, title, tags);});
 
   CLI11_PARSE(app, argc, argv);
 
