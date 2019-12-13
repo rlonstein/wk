@@ -19,11 +19,13 @@ add_subdirectory(libs/CLI11)
 add_subdirectory(libs/fmt)
 add_subdirectory(libs/nlohmann_json)
 add_subdirectory(libs/SQLiteCpp)
+add_subdirectory(libs/yaml-cpp)
 
 include_directories("libs/CLI11/include")
 include_directories("libs/fmt/include")
 include_directories("libs/easyloggingpp/src")
 include_directories("libs/SQLiteCpp/include")
+include_directories("libs/yaml-cpp/include")
 add_executable(wk src/wk.cpp)
 target_sources(wk
   PUBLIC
@@ -36,9 +38,12 @@ target_sources(wk
   src/new.cpp
   src/search.cpp
   src/finddb.cpp
-  libs/easyloggingpp/src/easylogging++.cc
-  )
-target_link_libraries(wk PRIVATE nlohmann_json::nlohmann_json)
-target_link_libraries(wk PRIVATE fmt::fmt)
-target_link_libraries(wk PRIVATE SQLiteCpp sqlite3 pthread dl)
+  src/utils.cpp
+  libs/easyloggingpp/src/easylogging++.cc)
+target_link_libraries(wk PRIVATE
+  fmt::fmt
+  SQLiteCpp  
+  yaml-cpp
+  nlohmann_json::nlohmann_json
+  sqlite3 pthread dl)
 target_link_libraries(wk PRIVATE stdc++fs)  # Work around GCC8/GCC9 on Ubuntu

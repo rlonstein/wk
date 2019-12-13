@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
   sub_add->add_option("--title", title);
   sub_add->add_option("--tags", tags)->expected(-1);
   sub_add->add_option("--text", text);
-  sub_add->final_callback([&title, &tags, &text](void){ WK::CMDS::addEntry(title, tags, text); });
+  sub_add->final_callback([&title, &tags, &text](void){ WK::CMDS::addEntryNoDatetime(title, tags, text); });
   
   // wk search [<tag>, ...]
   auto sub_search = app.add_subcommand("search", "search the wiki")->alias("s");

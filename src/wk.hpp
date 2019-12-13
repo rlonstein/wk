@@ -2,7 +2,7 @@
 #include <set>
 #include <string>
 #include <sstream>
-
+#include <utility>
 #include "fmt/format.h"
 #include "fmt/printf.h"
 #include "fmt/ostream.h"
@@ -14,17 +14,34 @@
 #pragma once
 
 namespace WK {
-  enum class ImportFileFormats { json, yaml };
-  const std::vector<std::pair<const char*, ImportFileFormats>> ImportFormatNames = {
-    {"json", ImportFileFormats::json}, {"yaml", ImportFileFormats::yaml}
+
+  enum class ImportFileFormat { json, yaml };
+  typedef std::pair<const char*, ImportFileFormat> ImportNameFormatPair;
+  const std::vector<ImportNameFormatPair> ImportFormatNames = {
+    {"json", ImportFileFormat::json},
+    {"yaml", ImportFileFormat::yaml}
   };
-  enum class ExportFileFormats { json, yaml, markdown };
-  const std::vector<std::pair<const char*, ExportFileFormats>> ExportFormatNames = {
-    {"json", ExportFileFormats::json}, {"yaml", ExportFileFormats::yaml}, {"markdown", ExportFileFormats::markdown}
+  const std::unordered_map<std::string, ImportFileFormat> ImportFormatNameMap = {
+    {"json", ImportFileFormat::json},
+    {"yaml", ImportFileFormat::yaml}
+  };
+  
+  enum class ExportFileFormat { json, yaml, markdown };
+  typedef std::pair<const char*, ExportFileFormat> ExportNameFormatPair;
+  const std::vector<ExportNameFormatPair> ExportFormatNames = {
+    {"json", ExportFileFormat::json},
+    {"yaml", ExportFileFormat::yaml},
+    {"markdown", ExportFileFormat::markdown}
+  };
+  const std::unordered_map<std::string, ExportFileFormat> ExportFormatNameMap = {
+    {"json", ExportFileFormat::json},
+    {"yaml", ExportFileFormat::yaml},
+    {"markdown", ExportFileFormat::markdown}
   };
 
   namespace CMDS {
-    void addEntry(std::string title, std::vector<std::string> tags, std::string text);
+    void addEntryNoDatetime(std::string title, std::vector<std::string> tags, std::string text);    
+    void addEntry(std::string title, std::vector<std::string> tags, std::string text, std::string created, std::string modified);
     void deleteEntry(std::string title);
     void editEntry(std::string title);
     void exportWiki(std::string filename, std::string format, std::string title, std::vector<std::string> tags);
@@ -39,6 +56,7 @@ namespace WK {
       {"HOME", "", ".wk.sqlite"}
     };
 
+    std::string getCurrentDatetime();
     bool envVarPathExists(std::string envvarname);
     std::string findDB();
   }

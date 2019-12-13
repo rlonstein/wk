@@ -1,17 +1,19 @@
 #include "wk.hpp"
 #include "sql.hpp"
 #include <numeric>
-#include <ctime>
-#include <iostream>
-#include <iomanip>
-#include <sstream>
 
-void WK::CMDS::addEntry(std::string title, std::vector<std::string> tags, std::string text) {
+void WK::CMDS::addEntryNoDatetime(std::string title, std::vector<std::string> tags, std::string text) {
+  std::string created = WK::UTILS::getCurrentDatetime();
+  VLOG(1) << "invoked addEntryNoDatetime, passing datetime of (" << created << ")";
+  WK::CMDS::addEntry(title, tags, text, created, created);
+}
+
+void WK::CMDS::addEntry(std::string title, std::vector<std::string> tags, std::string text, std::string created, std::string modified) {
   if (VLOG_IS_ON(1)) {
     std::string tagstr = std::accumulate(
       std::begin(tags), std::end(tags), std::string(),
       [](std::string &ss, std::string &s) { return ss.empty() ? "'"+s+"'" : ss+", '"+s+"'"; } );
-    VLOG(1) << "invoked add('" << title << "', [" << tagstr << "], '" << text << "')";
+    VLOG(1) << "invoked add('" << title << "', [" << tagstr << "], '" << text << "', '" << created << "', '" << modified << "')";
   }
 
   if (title.empty() || tags.empty() || text.empty()) {
@@ -49,6 +51,7 @@ void WK::CMDS::addEntry(std::string title, std::vector<std::string> tags, std::s
       tagRowIds.push_back(queryTags.getColumn(0));
       existingTags.push_back(queryTags.getColumn(1));
     }
+    VLOG(1) << "found " << existingTags.size() << " existing tags";
     std::vector<std::string> newTags;
     if (tags.size() > existingTags.size()) {
       std::sort(tags.begin(), tags.end());
@@ -57,6 +60,7 @@ void WK::CMDS::addEntry(std::string title, std::vector<std::string> tags, std::s
                           existingTags.begin(), existingTags.end(),
                           std::inserter(newTags, newTags.begin()));
     }
+    VLOG(1) << "adding " << newTags.size() << " new tags";
     SQLite::Transaction transaction(db);
     db.exec("PRAGMA foreign_keys = ON;");
     SQLite::Statement insertTag(db, "INSERT INTO tags VALUES(NULL, ?)");
@@ -69,12 +73,8 @@ void WK::CMDS::addEntry(std::string title, std::vector<std::string> tags, std::s
       insertTag.reset();
     }
     VLOG(1) << "Adding entry";
-    std::time_t t = std::time(nullptr);
-    std::tm tm = *std::localtime(&t);
-    std::stringstream timestr;
-    timestr << std::put_time(&tm, "%FT%T%z");
     SQLite::Statement insertEntry(db, "INSERT INTO entries VALUES (NULL, ?, ?, ?, ?)");
-    SQLite::bind(insertEntry, std::make_tuple(title, text, timestr.str(), timestr.str()));
+    SQLite::bind(insertEntry, std::make_tuple(title, text, created, modified));
     insertEntry.exec();
     long long entryRowId = db.getLastInsertRowid();
 
@@ -93,5 +93,4 @@ void WK::CMDS::addEntry(std::string title, std::vector<std::string> tags, std::s
     LOG(ERROR) << "SQLite error: " << e.what();
     throw CLI::RuntimeError(-1);
   }
-  throw CLI::Success();
 }
