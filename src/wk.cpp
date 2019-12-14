@@ -10,7 +10,6 @@ int main(int argc, char** argv) {
   app.allow_extras();
   app.require_subcommand(1,1);
 
-  std::set<std::string> formats {"json", "markdown"};  
   std::string filename;
   std::string title;
   std::string text;

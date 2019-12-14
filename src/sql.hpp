@@ -1,6 +1,6 @@
 #include "SQLiteCpp/SQLiteCpp.h"
 #include "SQLiteCpp/VariadicBind.h"
-#import <string>
+#include <string>
 
 namespace WK {
   namespace SQL {

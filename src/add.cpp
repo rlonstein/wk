@@ -1,6 +1,6 @@
 #include "wk.hpp"
 #include "sql.hpp"
-#include <numeric>
+#include <set>
 
 void WK::CMDS::addEntryNoDatetime(std::string title, std::vector<std::string> tags, std::string text) {
   std::string created = WK::UTILS::getCurrentDatetime();

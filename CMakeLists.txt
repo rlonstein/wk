@@ -37,7 +37,6 @@ target_sources(wk
   src/import.cpp
   src/new.cpp
   src/search.cpp
-  src/finddb.cpp
   src/utils.cpp
   libs/easyloggingpp/src/easylogging++.cc)
 target_link_libraries(wk PRIVATE
