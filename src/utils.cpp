@@ -10,6 +10,16 @@
 namespace WK {
   namespace UTILS {
 
+    std::string commafyStrVec(std::vector<std::string> vec, std::string substitute) {
+      std::string commafied = std::accumulate(
+        std::begin(vec), std::end(vec), std::string(),
+        [&substitute](std::string &ss, std::string &s) {
+          return ss.empty() ? (substitute.empty() ? s : substitute) :
+            ss+", "+ (substitute.empty() ? s : substitute);
+        });
+      return commafied;
+    }
+    
     bool envVarPathExists(std::string envvarname) {
       namespace fs = std::filesystem;
       const char* envvar = std::getenv(envvarname.c_str());

@@ -64,6 +64,7 @@ namespace WK {
       {"HOME", "", ".wk.sqlite"}
     };
 
+    std::string commafyStrVec(std::vector<std::string> vec, std::string substitute);
     std::string getCurrentDatetime();
     bool envVarPathExists(std::string envvarname);
     std::string findDB();

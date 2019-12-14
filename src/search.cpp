@@ -17,9 +17,7 @@ void WK::CMDS::searchWiki(WK::Tags keywords) {
 
   // First, search for tags matching the keywords
   std::vector<long long> tagRowIds;
-  std::string tagQueryBinding = std::accumulate(
-    keywords.begin(), keywords.end(), std::string(),
-    [](std::string &ss, std::string &s){ return ss.empty() ? "?" : ss+", ?"; });
+  std::string tagQueryBinding = WK::UTILS::commafyStrVec(keywords, "?");
   sql = fmt::sprintf(WK::SQL::templateQueryTags, tagQueryBinding);
   try {
     VLOG(1) << "Querying tags for " << keywords.size() << " keywords";

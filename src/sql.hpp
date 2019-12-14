@@ -35,5 +35,12 @@ namespace WK {
 
     const std::string deleteEntryById =
       "DELETE FROM entries WHERE entry_id = ?";
+
+    const std::string queryExportAll =
+      "SELECT entries.entry_id AS EntryId, entries.title AS Title, entries.content AS Content, "
+      "entries.created AS Created, entries.modified AS Modified,"
+      "GROUP_CONCAT(tags.tag, ' ') AS Tags FROM entries, tags "
+      "INNER JOIN taglist on tags.tag_id = taglist.tag_id "
+      "AND taglist.entry_id = EntryId GROUP BY Title";
   }
 }

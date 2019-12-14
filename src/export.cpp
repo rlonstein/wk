@@ -11,12 +11,9 @@ void exportJSON(std::string filename, std::string title, WK::Tags tags) {
   }
   std::string sql;
   if (title.empty() && tags.empty()) {
-    // export everything
-    sql = "SELECT entries.entry_id AS EntryId, entries.title AS Title, entries.content AS Content, "
-      "entries.created AS Created, entries.modified AS Modified,"
-      "GROUP_CONCAT(tags.tag, ' ') AS Tags FROM entries, tags "
-      "INNER JOIN taglist on tags.tag_id = taglist.tag_id "
-      "AND taglist.entry_id = EntryId GROUP BY Title";
+    sql = WK::SQL::queryExportAll;
+  } else {
+    // FIXME
   }
 
   using json = nlohmann::json;
@@ -52,9 +49,7 @@ void exportJSON(std::string filename, std::string title, WK::Tags tags) {
 
 void WK::CMDS::exportWiki(std::string filename, std::string format, std::string title, WK::Tags tags) {
   if (VLOG_IS_ON(1)) {
-    std::string tagstr = std::accumulate(
-      std::begin(tags), std::end(tags), std::string(),
-      [](std::string &ss, std::string &s) { return ss.empty() ? "'"+s+"'" : ss+", '"+s+"'"; } );
+    std::string tagstr = WK::UTILS::commafyStrVec(tags, std::string());
     VLOG(1) << "invoked export('" << filename << "', '" << format << "', '" << title << "', [" << tagstr << "])";
   }
 

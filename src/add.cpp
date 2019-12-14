@@ -5,9 +5,7 @@
 
 void WK::CMDS::addEntry(Entry entry) {
   if (VLOG_IS_ON(1)) {
-    std::string tagstr = std::accumulate(
-      std::begin(entry.tags), std::end(entry.tags), std::string(),
-      [](std::string &ss, std::string &s) { return ss.empty() ? "'"+s+"'" : ss+", '"+s+"'"; } );
+    std::string tagstr = WK::UTILS::commafyStrVec(entry.tags, std::string());
     VLOG(1) << "invoked add('" << entry.title << "', [" << tagstr << "], '" << entry.text
             << "', '" << entry.created << "', '" << entry.modified << "')";
   }
@@ -32,9 +30,7 @@ void WK::CMDS::addEntry(Entry entry) {
 
   try {
     SQLite::Database db(dbfqn, SQLite::OPEN_READWRITE);
-    std::string sql_tagQuery = std::accumulate(
-      entry.tags.begin(), entry.tags.end(), std::string(),
-      [](std::string &ss, std::string &s){ return ss.empty() ? "?" : ss+", ?"; });
+    std::string sql_tagQuery = WK::UTILS::commafyStrVec(entry.tags, "?");
     sql_tagQuery = "SELECT rowid, tag FROM tags WHERE tag in (" + sql_tagQuery + ")";
     SQLite::Statement queryTags(db, sql_tagQuery);
     for (std::size_t i=0; i<entry.tags.size(); i++) {
