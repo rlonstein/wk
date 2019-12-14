@@ -36,7 +36,7 @@ int main(int argc, char** argv) {
   // wk edit <title>
   auto sub_edit = app.add_subcommand("edit", "edit a wiki entry")->alias("e");
   sub_edit->add_option("title", title)->required();
-  sub_edit->final_callback(std::bind(&WK::CMDS::editEntry, title));
+  sub_edit->final_callback([&title](void){ WK::CMDS::editEntry(title); });
 
   // wk delete <title>
   auto sub_delete = app.add_subcommand("delete", "delete a wiki entry")->alias("d");
