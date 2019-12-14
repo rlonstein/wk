@@ -39,15 +39,23 @@ namespace WK {
     {"markdown", ExportFileFormat::markdown}
   };
 
+  typedef std::vector<std::string> Tags;
+  typedef struct {
+    std::string title;
+    std::string created;
+    std::string modified;
+    std::string text;
+    Tags tags;
+  } Entry;
+
   namespace CMDS {
-    void addEntryNoDatetime(std::string title, std::vector<std::string> tags, std::string text);    
-    void addEntry(std::string title, std::vector<std::string> tags, std::string text, std::string created, std::string modified);
+    void addEntry(Entry entry);
     void deleteEntry(std::string title);
     void editEntry(std::string title);
-    void exportWiki(std::string filename, std::string format, std::string title, std::vector<std::string> tags);
+    void exportWiki(std::string filename, std::string format, std::string title, Tags tags);
     void importWiki(std::string filename, std::string format);
     void newWiki(std::string filename);
-    void searchWiki(std::vector<std::string> keywords);
+    void searchWiki(Tags keywords);
   }
   namespace UTILS {
     constexpr std::string_view ENVPATHS[3][3] {
@@ -59,6 +67,7 @@ namespace WK {
     std::string getCurrentDatetime();
     bool envVarPathExists(std::string envvarname);
     std::string findDB();
+    Entry editEntry(Entry);
   }
 }
 #endif

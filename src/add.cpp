@@ -1,33 +1,29 @@
 #include "wk.hpp"
 #include "sql.hpp"
+#include <iterator>
 #include <set>
 
-void WK::CMDS::addEntryNoDatetime(std::string title, std::vector<std::string> tags, std::string text) {
-  std::string created = WK::UTILS::getCurrentDatetime();
-  VLOG(1) << "invoked addEntryNoDatetime, passing datetime of (" << created << ")";
-  WK::CMDS::addEntry(title, tags, text, created, created);
-}
-
-void WK::CMDS::addEntry(std::string title, std::vector<std::string> tags, std::string text, std::string created, std::string modified) {
+void WK::CMDS::addEntry(Entry entry) {
   if (VLOG_IS_ON(1)) {
     std::string tagstr = std::accumulate(
-      std::begin(tags), std::end(tags), std::string(),
+      std::begin(entry.tags), std::end(entry.tags), std::string(),
       [](std::string &ss, std::string &s) { return ss.empty() ? "'"+s+"'" : ss+", '"+s+"'"; } );
-    VLOG(1) << "invoked add('" << title << "', [" << tagstr << "], '" << text << "', '" << created << "', '" << modified << "')";
+    VLOG(1) << "invoked add('" << entry.title << "', [" << tagstr << "], '" << entry.text
+            << "', '" << entry.created << "', '" << entry.modified << "')";
   }
 
-  if (title.empty() || tags.empty() || text.empty()) {
-    LOG(ERROR) << "Missing parameters";
-    throw CLI::RuntimeError(-1);
-    // TODO: if any params are empty invoked external editor with yaml
-    // template:
-    //  ---
-    //  title:
-    //  tags: []
-    //  content:
-    // This belongs in its own function
+  if (entry.created.empty()) {
+    entry.created = WK::UTILS::getCurrentDatetime();
   }
-
+  if (entry.modified.empty()) {
+    entry.modified = WK::UTILS::getCurrentDatetime();
+  }
+  
+  int tries = 1;
+  while (tries-- > 0 && (entry.title.empty() || entry.tags.empty() || entry.text.empty())) {
+    LOG(WARNING) << "Missing parameters";
+    Entry e = WK::UTILS::editEntry(entry);
+  }
   auto dbfqn = WK::UTILS::findDB();
   if (dbfqn.empty()) {
     LOG(ERROR) << "No wiki database found!";
@@ -37,26 +33,26 @@ void WK::CMDS::addEntry(std::string title, std::vector<std::string> tags, std::s
   try {
     SQLite::Database db(dbfqn, SQLite::OPEN_READWRITE);
     std::string sql_tagQuery = std::accumulate(
-      tags.begin(), tags.end(), std::string(),
+      entry.tags.begin(), entry.tags.end(), std::string(),
       [](std::string &ss, std::string &s){ return ss.empty() ? "?" : ss+", ?"; });
     sql_tagQuery = "SELECT rowid, tag FROM tags WHERE tag in (" + sql_tagQuery + ")";
     SQLite::Statement queryTags(db, sql_tagQuery);
-    for (std::size_t i=0; i<tags.size(); i++) {
-      queryTags.bind(i+1, tags[i]);
+    for (std::size_t i=0; i<entry.tags.size(); i++) {
+      queryTags.bind(i+1, entry.tags[i]);
     }
     VLOG(1) << "executing tag query '" << sql_tagQuery << "'";
-    std::vector<std::string> existingTags;
+    Tags existingTags;
     std::vector<long long> tagRowIds;
     while (queryTags.executeStep()) {
       tagRowIds.push_back(queryTags.getColumn(0));
       existingTags.push_back(queryTags.getColumn(1));
     }
     VLOG(1) << "found " << existingTags.size() << " existing tags";
-    std::vector<std::string> newTags;
-    if (tags.size() > existingTags.size()) {
-      std::sort(tags.begin(), tags.end());
+    Tags newTags;
+    if (entry.tags.size() > existingTags.size()) {
+      std::sort(entry.tags.begin(), entry.tags.end());
       std::sort(existingTags.begin(), existingTags.end());
-      std::set_difference(tags.begin(), tags.end(),
+      std::set_difference(entry.tags.begin(), entry.tags.end(),
                           existingTags.begin(), existingTags.end(),
                           std::inserter(newTags, newTags.begin()));
     }
@@ -74,7 +70,7 @@ void WK::CMDS::addEntry(std::string title, std::vector<std::string> tags, std::s
     }
     VLOG(1) << "Adding entry";
     SQLite::Statement insertEntry(db, "INSERT INTO entries VALUES (NULL, ?, ?, ?, ?)");
-    SQLite::bind(insertEntry, std::make_tuple(title, text, created, modified));
+    SQLite::bind(insertEntry, std::make_tuple(entry.title, entry.text, entry.created, entry.modified));
     insertEntry.exec();
     long long entryRowId = db.getLastInsertRowid();
 

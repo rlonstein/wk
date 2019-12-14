@@ -13,7 +13,7 @@ int main(int argc, char** argv) {
   std::string filename;
   std::string title;
   std::string text;
-  std::vector<std::string> tags;
+  WK::Tags tags;
   std::string format = "json";
 
   // wk new <filename>
@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
   sub_add->add_option("--title", title);
   sub_add->add_option("--tags", tags)->expected(-1);
   sub_add->add_option("--text", text);
-  sub_add->final_callback([&title, &tags, &text](void){ WK::CMDS::addEntryNoDatetime(title, tags, text); });
+  sub_add->final_callback([&title, &tags, &text](void){ WK::CMDS::addEntry({title, "", "", text, tags});});
   
   // wk search [<tag>, ...]
   auto sub_search = app.add_subcommand("search", "search the wiki")->alias("s");

@@ -3,9 +3,8 @@
 
 
 void addJSONEntry(nlohmann::json js) {
-  std::string title, text, created, modified;
-  std::vector<std::string> tags;
-    
+  WK::Entry entry;
+
   if (! js.is_object()) {
     LOG(WARNING) << "Skipping element, not a json object";
     return;
@@ -14,8 +13,8 @@ void addJSONEntry(nlohmann::json js) {
     LOG(WARNING) << "Missing/empty field 'title' in entry, skipped";
     return;
   }
-  title = js.find("title")->get<std::string>();
-  if (title.empty()) {
+  entry.title = js.find("title")->get<std::string>();
+  if (entry.title.empty()) {
     LOG(WARNING) << "Missing/empty field 'title' in entry, skipped";
     return;
   }
@@ -27,30 +26,30 @@ void addJSONEntry(nlohmann::json js) {
   if (! js.find("tags")->is_array()) {
     LOG(WARNING) << "Incorrect field 'tags' in entry- not an array, skipped";
   }
-  tags = js.find("tags")->get<std::vector<std::string>>();
+  entry.tags = js.find("tags")->get<WK::Tags>();
     
   if (! js.count("text") || js.find("text")->empty()) {
     LOG(WARNING) << "Missing/empty field 'text' in entry, skipped";
     return;
   }
-  text = js.find("text")->get<std::string>();
-  if (text.empty()) {
+  entry.text = js.find("text")->get<std::string>();
+  if (entry.text.empty()) {
     LOG(WARNING) << "Missing/empty field 'text' in entry, skipped";
     return;
   }
 
   if (! js.count("created") || js.find("created")->empty()) {
-    created = WK::UTILS::getCurrentDatetime();
+    entry.created = WK::UTILS::getCurrentDatetime();
   } else {
-    created = js.find("created")->get<std::string>();
+    entry.created = js.find("created")->get<std::string>();
   }
     
   if (! js.count("modified") || js.find("modified")->empty()) {
-    modified = created;
+    entry.modified = entry.created;
   } else {
-    modified = js.find("modified")->get<std::string>();
+    entry.modified = js.find("modified")->get<std::string>();
   }
-  WK::CMDS::addEntry(title, tags, text, created, created);
+  WK::CMDS::addEntry(entry);
 }
 
 

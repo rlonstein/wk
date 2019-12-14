@@ -3,7 +3,7 @@
 #include "nlohmann/json.hpp"
 
 
-void exportJSON(std::string filename, std::string title, std::vector<std::string> tags) {
+void exportJSON(std::string filename, std::string title, WK::Tags tags) {
   auto dbfqn = WK::UTILS::findDB();
   if (dbfqn.empty()) {
     LOG(ERROR) << "No wiki database found!";
@@ -29,8 +29,8 @@ void exportJSON(std::string filename, std::string title, std::vector<std::string
       json entry;
       entry.emplace("title", queryEntriesAndTags.getColumn("Title"));
       std::istringstream is(queryEntriesAndTags.getColumn("Tags"));
-      std::vector<std::string> tags{std::istream_iterator<std::string>{is},
-                                    std::istream_iterator<std::string>{}};
+      WK::Tags tags{std::istream_iterator<std::string>{is},
+                    std::istream_iterator<std::string>{}};
       entry.emplace("tags", tags);
       entry.emplace("text", queryEntriesAndTags.getColumn("Content"));
       entry.emplace("created", queryEntriesAndTags.getColumn("Created"));
@@ -50,7 +50,7 @@ void exportJSON(std::string filename, std::string title, std::vector<std::string
 
 // FIXME: exportMarkdown
 
-void WK::CMDS::exportWiki(std::string filename, std::string format, std::string title, std::vector<std::string> tags) {
+void WK::CMDS::exportWiki(std::string filename, std::string format, std::string title, WK::Tags tags) {
   if (VLOG_IS_ON(1)) {
     std::string tagstr = std::accumulate(
       std::begin(tags), std::end(tags), std::string(),

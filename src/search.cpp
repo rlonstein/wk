@@ -1,7 +1,7 @@
 #include "wk.hpp"
 #include "sql.hpp"
 
-void WK::CMDS::searchWiki(std::vector<std::string> keywords) {
+void WK::CMDS::searchWiki(WK::Tags keywords) {
 
   if (keywords.empty()) {
     LOG(ERROR) << "No keywords specified!";
