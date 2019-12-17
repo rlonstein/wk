@@ -7,8 +7,8 @@
 #include "yaml-cpp/yaml.h"
 
 
-namespace WK {
-  namespace UTILS {
+namespace wk {
+  namespace utils {
 
     std::string commafyStrVec(std::vector<std::string> vec, std::string substitute) {
       std::string commafied = std::accumulate(
@@ -30,33 +30,6 @@ namespace WK {
         }
       }
       return false;
-    }
-
-    std::string findDB() {
-      VLOG(1) << "searching for db";
-      // candidates are:
-      // - $XDG_DATA_HOME/wk.sqlite,
-      // - $HOME/.local/share/wk.sqlite,
-      // - $HOME/.wk.sqlite
-      namespace fs = std::filesystem;
-      for (auto ep : WK::UTILS::ENVPATHS) {
-        const char* envvar = std::getenv(ep[0].data());
-        if (! envvar) {
-          VLOG(1) << "skipping " << ep[0] << ", unset";
-          continue;
-        }
-        VLOG(1) << "envvar " << ep[0] << " has value " << envvar;
-        fs::path path(envvar);
-        path /= ep[1];
-        path /= ep[2];
-        VLOG(1) << "checking for " << path;
-        if (fs::is_regular_file(path)) {
-          VLOG(1) << "Located db file at " << path;
-          return path;
-        }
-      }
-      LOG(ERROR) << "No wiki database found!";
-      return "";
     }
 
     std::string getCurrentDatetime() {
@@ -84,8 +57,8 @@ namespace WK {
         YAML::Emitter out;
         out << YAML::BeginMap;
         out << YAML::Key << "title" << YAML::Value << (entry.title.empty() ? "" : entry.title);
-        out << YAML::Key << "created" << YAML::Value << (entry.created.empty() ? WK::UTILS::getCurrentDatetime() : entry.created);
-        out << YAML::Key << "modified" << YAML::Value << (entry.modified.empty() ? WK::UTILS::getCurrentDatetime() : entry.modified);
+        out << YAML::Key << "created" << YAML::Value << (entry.created.empty() ? wk::utils::getCurrentDatetime() : entry.created);
+        out << YAML::Key << "modified" << YAML::Value << (entry.modified.empty() ? wk::utils::getCurrentDatetime() : entry.modified);
         out << YAML::Key << "tags" << YAML::Value << YAML::BeginSeq;
         if (entry.tags.empty()) {
           out << "";
@@ -115,7 +88,8 @@ namespace WK {
           entry.title = doc["title"].as<std::string>();
           entry.created = doc["created"].as<std::string>();
           entry.modified = doc["modified"].as<std::string>();
-          entry.tags = doc["tags"].as<WK::Tags>();
+          entry.tags = doc["tags"].as<wk::Tags>();
+          entry.tagIds = wk::sql::RowIds(); // null it out
           entry.text = doc["text"].as<std::string>();
         }
         catch (YAML::Exception e) {

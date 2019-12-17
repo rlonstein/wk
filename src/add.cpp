@@ -3,26 +3,26 @@
 #include <iterator>
 #include <set>
 
-void WK::CMDS::addEntry(Entry entry) {
+void wk::cmds::addEntry(Entry entry) {
   if (VLOG_IS_ON(1)) {
-    std::string tagstr = WK::UTILS::commafyStrVec(entry.tags, std::string());
+    std::string tagstr = wk::utils::commafyStrVec(entry.tags, std::string());
     VLOG(1) << "invoked add('" << entry.title << "', [" << tagstr << "], '" << entry.text
             << "', '" << entry.created << "', '" << entry.modified << "')";
   }
 
   if (entry.created.empty()) {
-    entry.created = WK::UTILS::getCurrentDatetime();
+    entry.created = wk::utils::getCurrentDatetime();
   }
   if (entry.modified.empty()) {
-    entry.modified = WK::UTILS::getCurrentDatetime();
+    entry.modified = wk::utils::getCurrentDatetime();
   }
   
   int tries = 1;
   while (tries-- > 0 && (entry.title.empty() || entry.tags.empty() || entry.text.empty())) {
     LOG(WARNING) << "Missing parameters";
-    Entry e = WK::UTILS::editEntry(entry);
+    Entry e = wk::utils::editEntry(entry);
   }
-  auto dbfqn = WK::UTILS::findDB();
+  auto dbfqn = wk::sql::findDB();
   if (dbfqn.empty()) {
     LOG(ERROR) << "No wiki database found!";
     throw CLI::RuntimeError(-1);
@@ -30,7 +30,7 @@ void WK::CMDS::addEntry(Entry entry) {
 
   try {
     SQLite::Database db(dbfqn, SQLite::OPEN_READWRITE);
-    std::string sql_tagQuery = WK::UTILS::commafyStrVec(entry.tags, "?");
+    std::string sql_tagQuery = wk::utils::commafyStrVec(entry.tags, "?");
     sql_tagQuery = "SELECT rowid, tag FROM tags WHERE tag in (" + sql_tagQuery + ")";
     SQLite::Statement queryTags(db, sql_tagQuery);
     for (std::size_t i=0; i<entry.tags.size(); i++) {
@@ -38,7 +38,7 @@ void WK::CMDS::addEntry(Entry entry) {
     }
     VLOG(1) << "executing tag query '" << sql_tagQuery << "'";
     Tags existingTags;
-    std::vector<long long> tagRowIds;
+    std::vector<wk::sql::RowId> tagRowIds;
     while (queryTags.executeStep()) {
       tagRowIds.push_back(queryTags.getColumn(0));
       existingTags.push_back(queryTags.getColumn(1));
@@ -68,7 +68,7 @@ void WK::CMDS::addEntry(Entry entry) {
     SQLite::Statement insertEntry(db, "INSERT INTO entries VALUES (NULL, ?, ?, ?, ?)");
     SQLite::bind(insertEntry, std::make_tuple(entry.title, entry.text, entry.created, entry.modified));
     insertEntry.exec();
-    long long entryRowId = db.getLastInsertRowid();
+    wk::sql::RowId entryRowId = db.getLastInsertRowid();
 
     SQLite::Statement insertEntryTagMapping(db, "INSERT INTO taglist VALUES (NULL, ?, ?)");
     for (auto tagRowId : tagRowIds) {
@@ -82,7 +82,7 @@ void WK::CMDS::addEntry(Entry entry) {
     transaction.commit();
   }
   catch (SQLite::Exception e) {
-    LOG(ERROR) << "SQLite error: " << e.what();
+    LOG(ERROR) << "sqlite error: " << e.what();
     throw CLI::RuntimeError(-1);
   }
 }

@@ -3,7 +3,7 @@
 
 
 void addJSONEntry(nlohmann::json js) {
-  WK::Entry entry;
+  wk::Entry entry;
 
   if (! js.is_object()) {
     LOG(WARNING) << "Skipping element, not a json object";
@@ -26,7 +26,7 @@ void addJSONEntry(nlohmann::json js) {
   if (! js.find("tags")->is_array()) {
     LOG(WARNING) << "Incorrect field 'tags' in entry- not an array, skipped";
   }
-  entry.tags = js.find("tags")->get<WK::Tags>();
+  entry.tags = js.find("tags")->get<wk::Tags>();
     
   if (! js.count("text") || js.find("text")->empty()) {
     LOG(WARNING) << "Missing/empty field 'text' in entry, skipped";
@@ -39,7 +39,7 @@ void addJSONEntry(nlohmann::json js) {
   }
 
   if (! js.count("created") || js.find("created")->empty()) {
-    entry.created = WK::UTILS::getCurrentDatetime();
+    entry.created = wk::utils::getCurrentDatetime();
   } else {
     entry.created = js.find("created")->get<std::string>();
   }
@@ -49,7 +49,7 @@ void addJSONEntry(nlohmann::json js) {
   } else {
     entry.modified = js.find("modified")->get<std::string>();
   }
-  WK::CMDS::addEntry(entry);
+  wk::cmds::addEntry(entry);
 }
 
 
@@ -82,19 +82,19 @@ void importJSON(std::string filename) {
 }
 
 
-void WK::CMDS::importWiki(std::string filename, std::string format) {
+void wk::cmds::importWiki(std::string filename, std::string format) {
   VLOG(1) << "invoked importWiki(" << filename << ", " << format << ")";
-  if (WK::ImportFormatNameMap.find(format) == WK::ImportFormatNameMap.end()) {
+  if (wk::ImportFormatNameMap.find(format) == wk::ImportFormatNameMap.end()) {
     // shouldn't happen, validated by CLI11
     LOG(ERROR) << "Unknown import format '" << format << "'";
     throw CLI::RuntimeError(-1);
   }
-  WK::ImportFileFormat ff = WK::ImportFormatNameMap.at(format);
+  wk::ImportFileFormat ff = wk::ImportFormatNameMap.at(format);
   switch (ff) {
-    case WK::ImportFileFormat::json:
+    case wk::ImportFileFormat::json:
       importJSON(filename);
       break;
-    case WK::ImportFileFormat::yaml:
+    case wk::ImportFileFormat::yaml:
       LOG(ERROR) << "Not implemented yet";
       break;
     default:

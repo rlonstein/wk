@@ -3,15 +3,15 @@
 #include "nlohmann/json.hpp"
 
 
-void exportJSON(std::string filename, std::string title, WK::Tags tags) {
-  auto dbfqn = WK::UTILS::findDB();
+void exportJSON(std::string filename, std::string title, wk::Tags tags) {
+  auto dbfqn = wk::sql::findDB();
   if (dbfqn.empty()) {
     LOG(ERROR) << "No wiki database found!";
     throw CLI::RuntimeError(-1);
   }
   std::string sql;
   if (title.empty() && tags.empty()) {
-    sql = WK::SQL::queryExportAll;
+    sql = wk::sql::queryExportAll;
   } else {
     // FIXME
   }
@@ -26,7 +26,7 @@ void exportJSON(std::string filename, std::string title, WK::Tags tags) {
       json entry;
       entry.emplace("title", queryEntriesAndTags.getColumn("Title"));
       std::istringstream is(queryEntriesAndTags.getColumn("Tags"));
-      WK::Tags tags{std::istream_iterator<std::string>{is},
+      wk::Tags tags{std::istream_iterator<std::string>{is},
                     std::istream_iterator<std::string>{}};
       entry.emplace("tags", tags);
       entry.emplace("text", queryEntriesAndTags.getColumn("Content"));
@@ -36,7 +36,7 @@ void exportJSON(std::string filename, std::string title, WK::Tags tags) {
     }
   }
   catch (SQLite::Exception e) {
-    LOG(ERROR) << "SQLite error: " << e.what();
+    LOG(ERROR) << "sqlite error: " << e.what();
     throw CLI::RuntimeError(-1);
   }
   std::ofstream fsout(filename);
@@ -47,21 +47,21 @@ void exportJSON(std::string filename, std::string title, WK::Tags tags) {
 
 // FIXME: exportMarkdown
 
-void WK::CMDS::exportWiki(std::string filename, std::string format, std::string title, WK::Tags tags) {
+void wk::cmds::exportWiki(std::string filename, std::string format, std::string title, wk::Tags tags) {
   if (VLOG_IS_ON(1)) {
-    std::string tagstr = WK::UTILS::commafyStrVec(tags, std::string());
+    std::string tagstr = wk::utils::commafyStrVec(tags, std::string());
     VLOG(1) << "invoked export('" << filename << "', '" << format << "', '" << title << "', [" << tagstr << "])";
   }
 
-  WK::ExportFileFormat ff = WK::ExportFormatNameMap.at(format);
+  wk::ExportFileFormat ff = wk::ExportFormatNameMap.at(format);
   switch (ff) {
-    case WK::ExportFileFormat::json:
+    case wk::ExportFileFormat::json:
       exportJSON(filename, title, tags);
       break;
-    case WK::ExportFileFormat::yaml:
+    case wk::ExportFileFormat::yaml:
       LOG(ERROR) << "Not implemented yet";
       break;
-    case WK::ExportFileFormat::markdown:
+    case wk::ExportFileFormat::markdown:
       LOG(ERROR) << "Not implemented yet";
       break;
     default:
