@@ -30,6 +30,10 @@ add_executable(wk src/wk.cpp)
 target_sources(wk
   PUBLIC
   src/wk.hpp
+  src/defs.hpp
+  src/sql.hpp
+  src/sql.cpp
+  src/utils.cpp  
   src/add.cpp
   src/delete.cpp
   src/edit.cpp
@@ -37,8 +41,6 @@ target_sources(wk
   src/import.cpp
   src/new.cpp
   src/search.cpp
-  src/sql.cpp
-  src/utils.cpp
   libs/easyloggingpp/src/easylogging++.cc)
 target_link_libraries(wk PRIVATE
   fmt::fmt

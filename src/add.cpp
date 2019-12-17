@@ -1,7 +1,5 @@
 #include "wk.hpp"
 #include "sql.hpp"
-#include <iterator>
-#include <set>
 
 void wk::cmds::addEntry(Entry entry) {
   if (VLOG_IS_ON(1)) {

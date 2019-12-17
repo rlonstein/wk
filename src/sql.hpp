@@ -59,9 +59,6 @@ namespace wk {
     
     template <typename T> wk::Entry getEntry(T rowId);
     template <typename T, typename U> wk::Entry getEntry(T db, U rowId);
-    template <> wk::Entry getEntry(RowId rowId);
-    template <> wk::Entry getEntry(std::string title);
-    template <> wk::Entry getEntry(SQLite::Database* dbptr, RowId rowId);
-    template <> wk::Entry getEntry(SQLite::Database* dbptr, std::string title);
+
   }
 }
