@@ -1,18 +1,27 @@
 #include "wk.hpp"
 #include "sql.hpp"
 #include <cstdlib>
-#include <filesystem>
 
 void wk::cmds::newWiki(std::string filename) {
+#ifndef USE_ALT_STDFS
+  namespace fs = std::filesystem;
+#else
+  namespace fs = ghc::filesystem;
+#endif
   if (filename.empty()) {
     for (auto ep : wk::utils::ENVPATHS) {
-      if (wk::utils::envVarPathExists(ep[0].data())) {
-        std::filesystem::path p(std::getenv(ep[0].data()));
-        p /= ep[1];
-        p /= ep[2];
-        filename = p;
-        VLOG(1) << "Will create " << filename;
-        break;
+      std::string candidate = ep[0].data();
+      VLOG(1) << "Checking envvar path " << candidate;
+      if (wk::utils::envVarPathExists(candidate)) {
+        fs::path p(std::getenv(ep[0].data()));
+        p /= std::string(ep[1]);
+        VLOG(1) << "Checking for " << p;
+        if (fs::exists(p)) {
+          p /= std::string(ep[2]);
+          filename = p;
+          VLOG(1) << "Will create " << filename;
+          break;
+        }
       }
     }
   }
@@ -20,7 +29,7 @@ void wk::cmds::newWiki(std::string filename) {
     LOG(ERROR) << "Cannot create new wiki, default locations undefined and no filename given";
     throw CLI::RuntimeError(-1);
   }
-  if (std::filesystem::exists(filename)) {
+  if (fs::exists(filename)) {
     LOG(ERROR) << "Refusing to overwrite existing wiki at " << filename;
     throw CLI::RuntimeError(-1);
   }

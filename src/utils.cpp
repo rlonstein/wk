@@ -1,11 +1,4 @@
-#include "wk.hpp"
-#include <cstdlib>
-#include <ctime>
-#include <filesystem>
-#include <iomanip>
-#include <sstream>
-#include "yaml-cpp/yaml.h"
-
+#include "utils.hpp"
 
 namespace wk {
   namespace utils {
@@ -21,7 +14,11 @@ namespace wk {
     }
     
     bool envVarPathExists(std::string envvarname) {
+#ifndef USE_ALT_STDFS
       namespace fs = std::filesystem;
+#else
+      namespace fs = ghc::filesystem;
+#endif
       const char* envvar = std::getenv(envvarname.c_str());
       if (envvar) {
         fs::path path(envvar);

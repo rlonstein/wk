@@ -1,6 +1,7 @@
 #include "wk.hpp"
 #include "sql.hpp"
 
+
 /*
  * DB related conveniences and common routines
  */
@@ -16,7 +17,11 @@ std::string wk::sql::findDB() {
   // - $XDG_DATA_HOME/wk.sqlite,
   // - $HOME/.local/share/wk.sqlite,
   // - $HOME/.wk.sqlite
+#ifndef USE_ALT_STDFS
   namespace fs = std::filesystem;
+#else
+  namespace fs = ghc::filesystem;
+#endif
   for (auto ep : wk::utils::ENVPATHS) {
     const char* envvar = std::getenv(ep[0].data());
     if (! envvar) {
@@ -25,8 +30,8 @@ std::string wk::sql::findDB() {
     }
     VLOG(1) << "envvar " << ep[0] << " has value " << envvar;
     fs::path path(envvar);
-    path /= ep[1];
-    path /= ep[2];
+    path /= std::string(ep[1]);
+    path /= std::string(ep[2]);
     VLOG(1) << "checking for " << path;
     if (fs::is_regular_file(path)) {
       VLOG(1) << "Located db file at " << path;

@@ -25,7 +25,8 @@ void exportJSON(std::string filename, std::string title, wk::Tags tags) {
     while (queryEntriesAndTags.executeStep()) {
       json entry;
       entry.emplace("title", queryEntriesAndTags.getColumn("Title"));
-      std::istringstream is(queryEntriesAndTags.getColumn("Tags"));
+      std::string tagstr = queryEntriesAndTags.getColumn("Tags");
+      std::istringstream is(tagstr);
       wk::Tags tags{std::istream_iterator<std::string>{is},
                     std::istream_iterator<std::string>{}};
       entry.emplace("tags", tags);

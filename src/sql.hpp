@@ -3,6 +3,11 @@
 #include "SQLiteCpp/SQLiteCpp.h"
 #include "SQLiteCpp/VariadicBind.h"
 #include <string>
+#ifndef USE_ALT_STDFS
+ #include <filesystem>
+#else
+ #include "ghc/filesystem.hpp"
+#endif
 
 namespace wk {
   namespace sql {
