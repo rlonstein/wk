@@ -45,7 +45,7 @@ namespace wk {
       "SELECT title, created, modified, content FROM entries WHERE entry_id = ?";
 
     const std::string queryTagsByEntryId =
-      "SELECT tags.tag_id as TagId, tags.tag as Tag FROM tags, taglist WHERE tags.tag = taglist.tag AND taglist.entry_id = ?";
+      "SELECT tags.tag_id as TagId, tags.tag as Tag FROM tags, taglist WHERE tags.tag_id = taglist.tag_id AND taglist.entry_id = ?";
 
     const std::string pragmaEnableFK = "PRAGMA foreign_keys = ON;";
 
@@ -66,11 +66,12 @@ namespace wk {
     template <typename T, typename U> wk::Entry getEntry(T db, U rowId);
     template <> inline wk::Entry getEntry(SQLite::Database* dbptr, wk::sql::RowId entryId) {
       wk::Entry entry;
+      VLOG(1) << "getEntry() searching for entryId #" << entryId;
       try {
         SQLite::Statement queryEntry(*dbptr, wk::sql::queryEntryById);
         queryEntry.bind(1, entryId);
         if (! queryEntry.executeStep()) {
-          LOG(WARNING) << "Entry #" << entryId << " not found";
+          LOG(WARNING) << "EntryId #" << entryId << " not found";
           entry.populated = false;
           return entry;
         }
@@ -79,18 +80,20 @@ namespace wk {
         entry.created = std::string(queryEntry.getColumn("created"));
         entry.modified = std::string(queryEntry.getColumn("modified"));
         entry.text = std::string(queryEntry.getColumn("content"));
+        VLOG(1) << "Found entry, querying tags...";
         SQLite::Statement queryTags(*dbptr, wk::sql::queryTagsByEntryId);
         queryTags.bind(1, entryId);
         while (queryTags.executeStep()) {
-          entry.tags.push_back(queryTags.getColumn(0));
-          entry.tagIds.push_back(queryTags.getColumn(1));
+          entry.tags.push_back(queryTags.getColumn("Tag"));
+          entry.tagIds.push_back(queryTags.getColumn("TagId"));
         }
+        VLOG(1) << "Have " << entry.tags.size() << " tags for entry";
       }
       catch (SQLite::Exception e) {
         LOG(ERROR) << "SQLite Error: " << e.what();
         throw CLI::RuntimeError(-1);
       }
-      return entry;  
+      return entry;
     }    
 
     template <> inline wk::Entry getEntry(SQLite::Database* dbptr, std::string title) {
