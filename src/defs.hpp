@@ -37,7 +37,7 @@ namespace wk {
     {"markdown", ExportFileFormat::markdown}
   };
 
-  typedef struct {
+  typedef struct Entry {
     bool populated;
     std::string title;
     std::string created;
@@ -46,6 +46,16 @@ namespace wk {
     wk::Tags tags;
     wk::sql::RowIds tagIds;
     wk::sql::RowId entryId;
+
+    bool operator==(const Entry& rhs) {
+      return std::tie(title, created, modified, text, tags) ==
+        std::tie(rhs.title, rhs.created, rhs.modified, rhs.text, rhs.tags);
+    }
+
+    bool operator!=(const Entry& rhs) {
+      return !(*this == rhs);
+    }
+
   } Entry;  
 }
 
