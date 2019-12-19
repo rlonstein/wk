@@ -6,11 +6,6 @@
  * DB related conveniences and common routines
  */
 
-extern template wk::Entry wk::sql::getEntry(SQLite::Database* dbptr, wk::sql::RowId entryId);
-extern template wk::Entry wk::sql::getEntry(SQLite::Database* dbptr, wk::sql::RowId entryId);
-extern template wk::Entry wk::sql::getEntry(wk::sql::RowId entryId);
-extern template wk::Entry wk::sql::getEntry(std::string title);
-
 std::string wk::sql::findDB() {
   VLOG(1) << "searching for db";
   // candidates are:
