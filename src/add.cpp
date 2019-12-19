@@ -18,8 +18,9 @@ void wk::cmds::addEntry(Entry entry) {
   int tries = 1;
   while (tries-- > 0 && (entry.title.empty() || entry.tags.empty() || entry.text.empty())) {
     LOG(WARNING) << "Missing parameters";
-    Entry e = wk::utils::editEntry(entry);
+    entry = wk::utils::editEntry(entry);
   }
+  
   auto dbfqn = wk::sql::findDB();
   if (dbfqn.empty()) {
     LOG(ERROR) << "No wiki database found!";
