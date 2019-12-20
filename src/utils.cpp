@@ -1,3 +1,4 @@
+#include "defs.hpp"
 #include "utils.hpp"
 
 namespace wk {
@@ -11,6 +12,14 @@ namespace wk {
             ss+", "+ (substitute.empty() ? s : substitute);
         });
       return commafied;
+    }
+
+    wk::TagNames getTagNamesFromTags(wk::Tags tags) {
+      wk::TagNames names;
+      std::transform(tags.begin(), tags.end(),
+                     std::back_inserter(names),
+                     [](const wk::Tag& t){return t.name;});
+      return names;
     }
     
     bool envVarPathExists(std::string envvarname) {
@@ -61,7 +70,7 @@ namespace wk {
           out << "";
         } else {
           for (auto tag : entry.tags) {
-            out << tag;
+            out << tag.name;
           }
         }
         out << YAML::EndSeq;
@@ -85,8 +94,11 @@ namespace wk {
           entry.title = doc["title"].as<std::string>();
           entry.created = doc["created"].as<std::string>();
           entry.modified = doc["modified"].as<std::string>();
-          entry.tags = doc["tags"].as<wk::Tags>();
-          entry.tagIds = wk::sql::RowIds(); // null it out
+          wk::Tags tags;
+          for (wk::TagName tag : doc["tags"].as<wk::TagNames>()) {
+            tags.push_back({tag, wk::sql::INVALID_ROWID});
+          }
+          entry.tags = tags;
           entry.text = doc["text"].as<std::string>();
         }
         catch (YAML::Exception e) {

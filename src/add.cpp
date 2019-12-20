@@ -3,7 +3,7 @@
 
 void wk::cmds::addEntry(Entry entry) {
   if (VLOG_IS_ON(1)) {
-    std::string tagstr = wk::utils::commafyStrVec(entry.tags, std::string());
+    std::string tagstr = wk::utils::commafyStrVec(wk::utils::getTagNamesFromTags(entry.tags), std::string());
     VLOG(1) << "invoked add('" << entry.title << "', [" << tagstr << "], '" << entry.text
             << "', '" << entry.created << "', '" << entry.modified << "')";
   }
@@ -29,18 +29,17 @@ void wk::cmds::addEntry(Entry entry) {
 
   try {
     SQLite::Database db(dbfqn, SQLite::OPEN_READWRITE);
-    std::string sql_tagQuery = wk::utils::commafyStrVec(entry.tags, "?");
+    std::string sql_tagQuery = wk::utils::commafyStrVec(wk::utils::getTagNamesFromTags(entry.tags), "?");
     sql_tagQuery = "SELECT rowid, tag FROM tags WHERE tag in (" + sql_tagQuery + ")";
     SQLite::Statement queryTags(db, sql_tagQuery);
     for (std::size_t i=0; i<entry.tags.size(); i++) {
-      queryTags.bind(i+1, entry.tags[i]);
+      queryTags.bind(i+1, entry.tags[i].name);
     }
     VLOG(1) << "executing tag query '" << sql_tagQuery << "'";
     Tags existingTags;
     std::vector<wk::sql::RowId> tagRowIds;
     while (queryTags.executeStep()) {
-      tagRowIds.push_back(queryTags.getColumn(0));
-      existingTags.push_back(queryTags.getColumn(1));
+      existingTags.push_back( {queryTags.getColumn(1), queryTags.getColumn(0)} );
     }
     VLOG(1) << "found " << existingTags.size() << " existing tags";
     Tags newTags;
@@ -49,15 +48,15 @@ void wk::cmds::addEntry(Entry entry) {
       std::sort(existingTags.begin(), existingTags.end());
       std::set_difference(entry.tags.begin(), entry.tags.end(),
                           existingTags.begin(), existingTags.end(),
-                          std::inserter(newTags, newTags.begin()));
+                          std::back_inserter(newTags));
     }
     VLOG(1) << "adding " << newTags.size() << " new tags";
     SQLite::Transaction transaction(db);
     db.exec("PRAGMA foreign_keys = ON;");
     SQLite::Statement insertTag(db, "INSERT INTO tags VALUES(NULL, ?)");
     for (auto const& tag : newTags) {
-      VLOG(1) << "Adding tag '" << tag << "'";
-      insertTag.bind(1, tag);
+      VLOG(1) << "Adding tag '" << tag.name << "'";
+      insertTag.bind(1, tag.name);
       insertTag.exec();
       tagRowIds.push_back(db.getLastInsertRowid());
       insertTag.clearBindings();

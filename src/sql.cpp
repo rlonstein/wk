@@ -37,20 +37,18 @@ std::string wk::sql::findDB() {
   return "";
 }
 
-std::vector<std::pair<wk::Tag, wk::sql::RowId>> wk::sql::queryTagInfo(RowId entryId) {
+wk::Tags wk::sql::queryTagInfo(RowId entryId) {
   auto dbfqn = wk::sql::findDB();
   if (dbfqn.empty()) {
     LOG(ERROR) << "No wiki database found!";
     throw CLI::RuntimeError(-1);
   }
-  std::vector<std::pair<wk::Tag, wk::sql::RowId>> results;
+  wk::Tags results;
   SQLite::Database db(dbfqn, SQLite::OPEN_READONLY);
   SQLite::Statement sql(db, wk::sql::queryTagsByEntryId);
   sql.bind(1, entryId);
   while (sql.executeStep()) {
-    results.push_back(std::make_pair(sql.getColumn("TagId"),
-                                     sql.getColumn("Tag")));
+    results.push_back({ sql.getColumn("Tag"), sql.getColumn("TagId") });
   }
   return results;
 }
-

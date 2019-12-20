@@ -24,10 +24,10 @@ namespace wk {
     void addEntry(wk::Entry entry);
     void deleteEntry(std::string title);
     void editEntry(std::string title);
-    void exportWiki(std::string filename, std::string format, std::string title, wk::Tags tags);
+    void exportWiki(std::string filename, std::string format, std::string title, wk::TagNames tags);
     void importWiki(std::string filename, std::string format);
     void newWiki(std::string filename);
-    void searchWiki(wk::Tags keywords);
+    void searchWiki(wk::TagNames keywords);
   }
   namespace utils {
     constexpr std::string_view ENVPATHS[3][3] {
@@ -40,6 +40,7 @@ namespace wk {
     std::string getCurrentDatetime();
     bool envVarPathExists(std::string envvarname);
     wk::Entry editEntry(wk::Entry);
+    wk::TagNames getTagNamesFromTags(wk::Tags);
   }
 }
 #endif

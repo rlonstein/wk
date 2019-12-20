@@ -60,7 +60,7 @@ namespace wk {
       "AND taglist.entry_id = EntryId GROUP BY Title";
 
     std::string findDB();
-    std::vector<std::pair<wk::Tag, RowId>> queryTagInfo(RowId entryId);
+    Tags queryTagInfo(RowId entryId);
     
     template <typename T> wk::Entry getEntry(T rowId);
     template <typename T, typename U> wk::Entry getEntry(T db, U rowId);
@@ -84,8 +84,7 @@ namespace wk {
         SQLite::Statement queryTags(*dbptr, wk::sql::queryTagsByEntryId);
         queryTags.bind(1, entryId);
         while (queryTags.executeStep()) {
-          entry.tags.push_back(queryTags.getColumn("Tag"));
-          entry.tagIds.push_back(queryTags.getColumn("TagId"));
+          entry.tags.push_back( {queryTags.getColumn("Tag"), queryTags.getColumn("TagId")} );
         }
         VLOG(1) << "Have " << entry.tags.size() << " tags for entry";
       }

@@ -13,7 +13,7 @@ int main(int argc, char** argv) {
   std::string filename;
   std::string title;
   std::string text;
-  wk::Tags tags;
+  std::vector<wk::TagName> tagnames;
   std::string format = "json";
 
   // wk new <filename>
@@ -24,14 +24,20 @@ int main(int argc, char** argv) {
   // wk add --title <title> --tags [<tag>, ...] --text <text>
   auto sub_add = app.add_subcommand("add", "add a wiki entry")->alias("a");
   sub_add->add_option("--title", title);
-  sub_add->add_option("--tags", tags)->expected(-1);
+  sub_add->add_option("--tags", tagnames)->expected(-1);
   sub_add->add_option("--text", text);
-  sub_add->final_callback([&title, &tags, &text](void){ wk::cmds::addEntry({false, title, "", "", text, tags, {}, -1});});
-  
+  sub_add->final_callback([&title, &tagnames, &text](void){
+                            wk::Tags tags;
+                            for (wk::TagName tagname : tagnames) {
+                              tags.push_back({tagname, wk::sql::INVALID_ROWID});
+                            }
+                            wk::cmds::addEntry({false, title, "", "", text, tags, {}});
+                          });
+
   // wk search [<tag>, ...]
   auto sub_search = app.add_subcommand("search", "search the wiki")->alias("s");
-  sub_search->add_option("keywords", tags)->expected(-1);
-  sub_search->final_callback([&tags](void){wk::cmds::searchWiki(tags);});
+  sub_search->add_option("keywords", tagnames)->expected(-1);
+  sub_search->final_callback([&tagnames](void){wk::cmds::searchWiki(tagnames);});
   
   // wk edit <title>
   auto sub_edit = app.add_subcommand("edit", "edit a wiki entry")->alias("e");
@@ -53,10 +59,10 @@ int main(int argc, char** argv) {
   auto sub_export = app.add_subcommand("export", "export one or more wiki entries")->alias("x");
   sub_export->add_option("filename", filename)->required();
   sub_export->add_option("--format", format, "output format", true)->check(CLI::IsMember(wk::ExportFormatNames));
-  auto sub_export_opt_tag = sub_export->add_option("--tags", tags)->expected(-1);
+  auto sub_export_opt_tag = sub_export->add_option("--tags", tagnames)->expected(-1);
   auto sub_export_opt_title = sub_export->add_option("--title", title)->excludes(sub_export_opt_tag);
   sub_export_opt_tag->excludes(sub_export_opt_title);
-  sub_export->final_callback([&filename, &format, &title, &tags](void){wk::cmds::exportWiki(filename, format, title, tags);});
+  sub_export->final_callback([&filename, &format, &title, &tagnames](void){wk::cmds::exportWiki(filename, format, title, tagnames);});
 
   CLI11_PARSE(app, argc, argv);
 

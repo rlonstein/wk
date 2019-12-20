@@ -26,8 +26,13 @@ void addJSONEntry(nlohmann::json js) {
   if (! js.find("tags")->is_array()) {
     LOG(WARNING) << "Incorrect field 'tags' in entry- not an array, skipped";
   }
-  entry.tags = js.find("tags")->get<wk::Tags>();
-    
+  wk::TagNames tagnames = js.find("tags")->get<wk::TagNames>();
+  wk::Tags tags;
+  for (wk::TagName tag : tagnames) {
+    tags.push_back({tag, wk::sql::INVALID_ROWID});
+  }
+  entry.tags = (tags);
+
   if (! js.count("text") || js.find("text")->empty()) {
     LOG(WARNING) << "Missing/empty field 'text' in entry, skipped";
     return;

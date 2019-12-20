@@ -1,7 +1,7 @@
 #include "wk.hpp"
 #include "sql.hpp"
 
-void wk::cmds::searchWiki(wk::Tags keywords) {
+void wk::cmds::searchWiki(wk::TagNames keywords) {
 
   if (keywords.empty()) {
     LOG(ERROR) << "No keywords specified!";
