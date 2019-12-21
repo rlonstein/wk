@@ -25,7 +25,9 @@ Prequisites:
 
 ```
 $ git clone https://git.sr.ht/~rlonstein/wk.git
-$ cd wk && mkdir build && cd build
+$ cd wk
+$ ./update-submodules.sh
+$ mkdir build && cd build
 $ cmake ..
 $ make
 ```
