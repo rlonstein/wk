@@ -24,13 +24,13 @@ namespace wk {
     "CREATE TABLE taglist(taglist_id INTEGER UNIQUE NOT NULL PRIMARY KEY,"
     "entry_id INTEGER NOT NULL, tag_id INTEGER NOT NULL,"
     "FOREIGN KEY(entry_id) REFERENCES entries(entry_id) ON DELETE CASCADE,"
-    "FOREIGN KEY(tag_id) REFERENCES tags(entry_id) ON DELETE CASCADE);";
+    "FOREIGN KEY(tag_id) REFERENCES tags(tag_id) ON DELETE CASCADE);";
 
     const std::string queryEntriesMatchingTags =
     "SELECT entries.entry_id, entries.title, entries.content "
     "FROM entries, taglist WHERE entries.entry_id = taglist.entry_id AND taglist.tag_id = ?";
 
-    const std::string templateQueryTags = "SELECT tag_id FROM tags WHERE tag in (%s)";
+    const std::string templateQueryTags = "SELECT tag_id, tag FROM tags WHERE tag in (%s)";
     
     const std::string queryEntriesTitleLike =
       "SELECT entry_id, title, content FROM entries WHERE title LIKE ?";
