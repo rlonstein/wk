@@ -22,9 +22,8 @@ namespace wk {
     const std::string newSchemaTaglist =
     "PRAGMA foreign_keys = ON;"
     "CREATE TABLE taglist(taglist_id INTEGER UNIQUE NOT NULL PRIMARY KEY,"
-    "entry_id INTEGER NOT NULL, tag_id INTEGER NOT NULL,"
-    "FOREIGN KEY(entry_id) REFERENCES entries(entry_id) ON DELETE CASCADE,"
-    "FOREIGN KEY(tag_id) REFERENCES tags(tag_id) ON DELETE CASCADE);";
+    "entry_id INTEGER NOT NULL REFERENCES entries(entry_id) ON DELETE CASCADE,"
+    "tag_id INTEGER NOT NULL REFERENCES tags(tag_id) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED);";
 
     const std::string queryEntriesMatchingTags =
     "SELECT entries.entry_id, entries.title, entries.content "
@@ -75,6 +74,7 @@ namespace wk {
           entry.populated = false;
           return entry;
         }
+        entry.entryId = entryId;
         entry.populated = true;
         entry.title = std::string(queryEntry.getColumn("title"));
         entry.created = std::string(queryEntry.getColumn("created"));
