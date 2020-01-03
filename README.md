@@ -11,9 +11,9 @@ the command line using a single binary, a single compact data file,
 and to transfer them between systems.
 
 `wk` is an experiment. It is something less than either a Wiki or a
-Personal Information Manager (PIM). It lacks WikiWord-style linking
-and imposes no organization other than the user-supplied tags and the
-entry titles. This works for me.
+Personal Information Manager (PIM). It currently lacks WikiWord-style
+linking and imposes no organization other than the user-supplied tags
+and the entry titles. This works for me.
 
 ## Building
 
@@ -68,13 +68,6 @@ Entries must have `title`, `text`, and `tags` fields. The `created` or
 `modified` fields are optional, and will filled using the current
 system time.
 
-## TODO
+## To Do
 
-- &#x2610; Tests
-- &#x2610; Editing tags
-- &#x2610; Import/Export YAML
-- &#x2610; Import HTML bookmarks
-- &#x2610; Export Markdown (indirectly HTML output)
-- &#x2610; DB maintenance
-- ? Categories (tags mapped to tags)
-- ? Option to build/use project sqlite3 (amalgam) instead of system version
+See https://todo.sr.ht/~rlonstein/wk
