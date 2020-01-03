@@ -1,9 +1,11 @@
 #include "wk.hpp"
+#include "utils.hpp"
 #include "sql.hpp"
 
 void wk::cmds::addEntry(Entry entry) {
   if (VLOG_IS_ON(1)) {
-    std::string tagstr = wk::utils::commafyStrVec(wk::utils::getTagNamesFromTags(entry.tags), std::string());
+    wk::TagNames tn = wk::utils::getTagNamesFromTags(entry.tags);
+    std::string tagstr = wk::utils::commafyStrVec(tn);
     VLOG(1) << "invoked add('" << entry.title << "', [" << tagstr << "], '" << entry.text
             << "', '" << entry.created << "', '" << entry.modified << "')";
   }

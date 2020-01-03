@@ -1,4 +1,5 @@
 #include "wk.hpp"
+#include "utils.hpp"
 #include "sql.hpp"
 #include "nlohmann/json.hpp"
 
@@ -50,7 +51,7 @@ void exportJSON(std::string filename, std::string title, wk::TagNames tags) {
 
 void wk::cmds::exportWiki(std::string filename, std::string format, std::string title, wk::TagNames tags) {
   if (VLOG_IS_ON(1)) {
-    std::string tagstr = wk::utils::commafyStrVec(tags, std::string());
+    std::string tagstr = wk::utils::commafyStrVec(tags);
     VLOG(1) << "invoked export('" << filename << "', '" << format << "', '" << title << "', [" << tagstr << "])";
   }
 

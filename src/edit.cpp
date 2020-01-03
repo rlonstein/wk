@@ -1,4 +1,5 @@
 #include "wk.hpp"
+#include "utils.hpp"
 #include "sql.hpp"
 
 void wk::cmds::editEntry(std::string title) {
@@ -44,10 +45,10 @@ void wk::cmds::editEntry(std::string title) {
                         oldTagNames.begin(), oldTagNames.end(),
                         std::inserter(addedTagNames, addedTagNames.begin()));
     if (VLOG_IS_ON(1)) {
-      VLOG(1) << "original tags == [" << wk::utils::commafyStrVec(oldTagNames, std::string()) << "]";
-      VLOG(1) << "current tags == [" << wk::utils::commafyStrVec(modTagNames, std::string()) << "]";
-      VLOG(1) << "removed == [" << wk::utils::commafyStrVec(removedTagNames, std::string()) << "]";
-      VLOG(1) << "added == [" << wk::utils::commafyStrVec(addedTagNames, std::string()) << "]";
+      VLOG(1) << "original tags == [" << wk::utils::commafyStrVec(oldTagNames) << "]";
+      VLOG(1) << "current tags == [" << wk::utils::commafyStrVec(modTagNames) << "]";
+      VLOG(1) << "removed == [" << wk::utils::commafyStrVec(removedTagNames) << "]";
+      VLOG(1) << "added == [" << wk::utils::commafyStrVec(addedTagNames) << "]";
     }
 
     if (removedTagNames.empty()) {

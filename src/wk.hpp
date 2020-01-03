@@ -29,18 +29,5 @@ namespace wk {
     void newWiki(std::string filename);
     void searchWiki(wk::TagNames keywords);
   }
-  namespace utils {
-    constexpr std::string_view ENVPATHS[3][3] {
-      {"XDG_DATA_HOME", "", "wk.sqlite"},
-      {"HOME", ".local/share/", "wk.sqlite"},
-      {"HOME", "", ".wk.sqlite"}
-    };
-
-    std::string commafyStrVec(std::vector<std::string> vec, std::string substitute);
-    std::string getCurrentDatetime();
-    bool envVarPathExists(std::string envvarname);
-    wk::Entry editEntry(wk::Entry);
-    wk::TagNames getTagNamesFromTags(wk::Tags);
-  }
 }
 #endif

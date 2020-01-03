@@ -1,4 +1,5 @@
 #include "wk.hpp"
+#include "utils.hpp"
 #include "sql.hpp"
 
 void wk::cmds::searchWiki(wk::TagNames keywords) {
